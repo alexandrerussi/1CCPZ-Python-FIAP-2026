@@ -25,4 +25,53 @@ def verifica_erros(codigos_endpoint):
             return True
     return False
 
-print(verifica_erros(status[0]))
+# LISTA DE REQUISIÇÕES DE 1 ENDPOINT
+# [200, 200, 401, 200, 500]
+# [201, 500, 502, 201, 500]
+def analisar_endpoint(codigos_endpoint):
+    qtd_sucessos = 0
+
+    for codigo in codigos_endpoint:
+        if eh_sucesso(codigo):
+            qtd_sucessos += 1
+
+    qtd_total = len(codigos_endpoint)
+    qtd_erros = qtd_total -qtd_sucessos
+    percentual_sucesso = (qtd_sucessos / qtd_total) * 100
+
+    tem_erros_seguidos = verifica_erros(codigos_endpoint)
+
+    if tem_erros_seguidos:
+        classificacao = "CRÍTICO"
+    elif percentual_sucesso >= 80:
+        classificacao = "ESTÁVEL"
+    else:
+        classificacao = "INSTÁVEL"
+
+    return (qtd_sucessos, qtd_erros, percentual_sucesso, classificacao)
+
+# PERCORRER A MATRIZ status
+
+maior_erro = 0
+endpoint_maior_erro = ""
+
+for i in range(len(endpoints)):
+    nome_endpoint = endpoints[i]
+    codigos_http = status[i]
+
+    sucessos, erros, percentual, classificacao = analisar_endpoint(codigos_http)
+
+    if erros > maior_erro:
+        maior_erro = erros
+        endpoint_maior_erro = nome_endpoint
+
+    print(f"Endpoint: {nome_endpoint}")
+    print(f"Requisições: {codigos_http}")
+    print(f"Sucessos: {sucessos}")
+    print(f"Erros: {erros}")
+    print(f"% de sucessos: {percentual}")
+    print(f"Classificação: {classificacao}")
+    print("-" * 30)
+    print()
+
+print(f"Endpoint maior erro: {endpoint_maior_erro} ({maior_erro})")
